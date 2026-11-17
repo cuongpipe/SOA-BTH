@@ -67,26 +67,23 @@
 
 ## 4. Endpoints BTH4 - Order Service (`http://localhost:8082`)
 
-> **Lưu ý:** Tất cả API bên dưới đều yêu cầu Header `Authorization: Bearer <token>`. Order Service sẽ tự động gọi sang Product Service (`8081`) để kiểm tra tồn kho khi tạo đơn hàng.
+> **Lưu ý:** Tất cả API bên dưới đều yêu cầu Header `Authorization: Bearer <token>` (xác thực qua Auth Service cổng `8080` và kiểm tra tồn kho qua Product Service cổng `8081`).
 
-### Quản lý Đơn hàng (`/orders`)
+### Quản lý đơn hàng (`/orders`)
 
-* **`GET /orders`** — Lấy danh sách tất cả các đơn hàng
+* **`GET /orders`** — Lấy danh sách tất cả đơn hàng
 
-* **`GET /orders/{id}`** — Lấy thông tin chi tiết một đơn hàng theo ID
+* **`GET /orders/{id}`** — Lấy thông tin chi tiết 1 đơn hàng theo ID
 
-* **`POST /orders`** — Tạo đơn hàng mới (Kiểm tra tồn kho sản phẩm tự động)
+* **`POST /orders`** — Tạo đơn hàng mới (tự động kiểm tra và trừ tồn kho)
   * Body (JSON):
     ```json
     {
-      "customerName": "Long Quoc Cuong",
+      "customerName": "Long Quốc Cường",
       "customerEmail": "cuong4651050032@st.qnu.edu.vn",
-      "status": "pending",
       "items": [
-        {
-          "productId": 1,
-          "quantity": 2
-        }
+        {"productId": 1, "quantity": 1},
+        {"productId": 2, "quantity": 2}
       ]
     }
     ```
@@ -94,43 +91,30 @@
 * **`PUT /orders/{id}`** — Cập nhật trạng thái đơn hàng (`pending`, `completed`, `cancelled`)
   * Body (JSON):
     ```json
-    {
-      "status": "completed"
-    }
+    {"status": "completed"}
     ```
 
-* **`DELETE /orders/{id}`** — Xóa một đơn hàng theo ID
+* **`DELETE /orders/{id}`** — Xóa đơn hàng theo ID
 
-### Quản lý Chi tiết đơn hàng (`/order_items`)
+### Quản lý chi tiết đơn hàng (`/order_items`)
 
-* **`GET /order_items`** — Lấy danh sách tất cả mặt hàng trong đơn hàng
+* **`GET /order_items`** — Lấy danh sách tất cả mặt hàng trong các đơn hàng
 
-* **`GET /order_items/{id}`** — Lấy thông tin chi tiết một mặt hàng
+* **`GET /order_items/{id}`** — Lấy thông tin chi tiết 1 mặt hàng theo ID
 
-* **`POST /order_items`** — Tạo mặt hàng mới vào đơn hàng
+* **`POST /order_items`** — Thêm mặt hàng mới vào đơn hàng có sẵn
   * Body (JSON):
     ```json
-    {
-      "orderId": 1,
-      "productId": 1,
-      "productName": "Laptop",
-      "quantity": 2,
-      "unitPrice": 25000000
-    }
+    {"orderId": 1, "productId": 3, "quantity": 1}
     ```
 
-* **`PUT /order_items/{id}`** — Cập nhật mặt hàng
+* **`PUT /order_items/{id}`** — Cập nhật mặt hàng trong đơn hàng
   * Body (JSON):
     ```json
-    {
-      "quantity": 3,
-      "unitPrice": 25000000
-    }
+    {"productId": 3, "quantity": 2}
     ```
 
-* **`DELETE /order_items/{id}`** — Xóa một mặt hàng trong đơn hàng
-
----
+* **`DELETE /order_items/{id}`** — Xóa mặt hàng khỏi đơn hàng
 
 # ảnh chụp màn hình 
 - bài thực hành số 2:
