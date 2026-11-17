@@ -36,6 +36,10 @@ public class OrderItemService {
         if (itemReq.getOrderIdInput() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thiếu orderId");
         }
+        if (itemReq.getQuantity() == null || itemReq.getQuantity() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Số lượng sản phẩm phải lớn hơn 0!");
+        }
+
         Order order = orderService.getOrderById(itemReq.getOrderIdInput());
         ProductDTO product = orderService.fetchProductFromService(itemReq.getProductId(), authHeader);
 
@@ -61,26 +65,59 @@ public class OrderItemService {
 
     @Transactional
     public OrderItem updateOrderItem(Integer id, OrderItem itemDetails, String authHeader) {
+        if (itemDetails.getQuantity() == null || itemDetails.getQuantity() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Số lượng sản phẩm phải lớn hơn 0!");
+        }
+
         OrderItem existingItem = getOrderItemById(id);
         int oldQty = existingItem.getQuantity();
         int newQty = itemDetails.getQuantity();
-        int diff = newQty - oldQty;
+        Integer targetProductId = itemDetails.getProductId() != null
+                ? itemDetails.getProductId()
+                : existingItem.getProductId();
 
-        ProductDTO product = orderService.fetchProductFromService(existingItem.getProductId(), authHeader);
-        if (diff > 0 && (product.getQuantity() == null || product.getQuantity() < diff)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Không đủ tồn kho để tăng số lượng!");
+        // Trường hợp 1: Giữ nguyên sản phẩm cũ, chỉ cập nhật số lượng
+        if (targetProductId.equals(existingItem.getProductId())) {
+            int diff = newQty - oldQty;
+            ProductDTO product = orderService.fetchProductFromService(existingItem.getProductId(), authHeader);
+
+            if (diff > 0 && (product.getQuantity() == null || product.getQuantity() < diff)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Không đủ tồn kho để tăng số lượng!");
+            }
+
+            existingItem.setQuantity(newQty);
+            existingItem.setUnitPrice(product.getPrice());
+            existingItem.setTotalPrice(product.getPrice().multiply(BigDecimal.valueOf(newQty)));
+
+            OrderItem updated = orderItemRepository.save(existingItem);
+            orderService.recalculateOrderTotal(existingItem.getOrder());
+            if (diff != 0) {
+                orderService.updateProductStock(product, -diff, authHeader);
+            }
+            return updated;
         }
 
+        // Trường hợp 2: Đổi sang sản phẩm mới
+        ProductDTO newProduct = orderService.fetchProductFromService(targetProductId, authHeader);
+        if (newProduct.getQuantity() == null || newProduct.getQuantity() < newQty) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Sản phẩm mới '" + newProduct.getName() + "' không đủ tồn kho!");
+        }
+
+        // Hoàn lại tồn kho cho sản phẩm cũ và trừ tồn kho sản phẩm mới
+        ProductDTO oldProduct = orderService.fetchProductFromService(existingItem.getProductId(), authHeader);
+        orderService.updateProductStock(oldProduct, oldQty, authHeader);
+        orderService.updateProductStock(newProduct, -newQty, authHeader);
+
+        // Cập nhật thông tin sản phẩm mới vào chi tiết đơn hàng
+        existingItem.setProductId(newProduct.getId());
+        existingItem.setProductName(newProduct.getName());
         existingItem.setQuantity(newQty);
-        existingItem.setUnitPrice(product.getPrice());
-        existingItem.setTotalPrice(product.getPrice().multiply(BigDecimal.valueOf(newQty)));
+        existingItem.setUnitPrice(newProduct.getPrice());
+        existingItem.setTotalPrice(newProduct.getPrice().multiply(BigDecimal.valueOf(newQty)));
 
         OrderItem updated = orderItemRepository.save(existingItem);
         orderService.recalculateOrderTotal(existingItem.getOrder());
-        if (diff != 0) {
-            orderService.updateProductStock(product, -diff, authHeader);
-        }
-
         return updated;
     }
 

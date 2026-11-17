@@ -28,17 +28,17 @@ CREATE TABLE IF NOT EXISTS order_items (
     CONSTRAINT fk_order_items_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
 );
 
-
--- 3. Dữ liệu mẫu cho bảng orders
+-- 3. Dữ liệu mẫu cho bảng orders (Khớp giá với product_db)
 INSERT INTO orders (id, customer_name, customer_email, total_amount, status) VALUES
-(1, 'Long Quốc Cường', 'cuong4651050032@st.qnu.edu.vn', 350000.00, 'completed'),
-(2, 'Nguyễn Văn An', 'an.nguyen@example.com', 520000.00, 'pending'),
-(3, 'Trần Thị Bình', 'binh.tran@example.com', 150000.00, 'cancelled');
+(1, 'Long Quốc Cường', 'cuong4651050032@st.qnu.edu.vn', 26850000.00, 'completed'),
+(2, 'Nguyễn Văn An', 'an.nguyen@example.com', 5900000.00, 'pending'),
+(3, 'Trần Thị Bình', 'binh.tran@example.com', 6490000.00, 'cancelled');
 
 -- 4. Dữ liệu mẫu cho bảng order_items
 INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, total_price) VALUES
-(1, 1, 'Bàn phím cơ không dây', 1, 250000.00, 250000.00),
-(1, 2, 'Chuột gaming RGB', 1, 100000.00, 100000.00),
-(2, 1, 'Bàn phím cơ không dây', 2, 250000.00, 500000.00),
-(2, 3, 'Lót chuột cỡ lớn', 1, 20000.00, 20000.00),
-(3, 2, 'Chuột gaming RGB', 1, 150000.00, 150000.00);
+(1, 1, 'Laptop Dell XPS 13', 1, 25000000.00, 25000000.00),
+(1, 2, 'Bàn phím cơ Keychron K2', 1, 1850000.00, 1850000.00),
+(2, 2, 'Bàn phím cơ Keychron K2', 2, 1850000.00, 3700000.00),
+(2, 3, 'Chuột Logitech MX Master 3S', 1, 2200000.00, 2200000.00),
+(3, 5, 'Tai nghe Sony WH-1000XM5', 1, 6490000.00, 6490000.00);
+

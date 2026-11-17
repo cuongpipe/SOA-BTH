@@ -55,9 +55,10 @@ public class OrderController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteOrder(@PathVariable Integer id) {
+    public ResponseEntity<?> deleteOrder(@PathVariable Integer id,
+                                         @RequestHeader("Authorization") String authHeader) {
         try {
-            orderService.deleteOrder(id);
+            orderService.deleteOrder(id, authHeader);
             return ResponseEntity.ok("Đã xóa đơn hàng thành công");
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getReason());

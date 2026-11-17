@@ -69,17 +69,29 @@ public class OrderService {
         );
     }
 
+    private static final List<String> VALID_STATUSES = List.of("pending", "completed", "cancelled");
+
     @Transactional
     public Order createOrder(Order orderRequest, String authHeader) {
+        String status = orderRequest.getStatus() != null ? orderRequest.getStatus().toLowerCase() : "pending";
+        if (!VALID_STATUSES.contains(status)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Trạng thái không hợp lệ. Chỉ chấp nhận: pending, completed, cancelled");
+        }
+
         Order order = new Order();
         order.setCustomerName(orderRequest.getCustomerName());
         order.setCustomerEmail(orderRequest.getCustomerEmail());
-        order.setStatus(orderRequest.getStatus() != null ? orderRequest.getStatus() : "pending");
+        order.setStatus(status);
 
         BigDecimal totalAmount = BigDecimal.ZERO;
 
         if (orderRequest.getItems() != null && !orderRequest.getItems().isEmpty()) {
             for (OrderItem itemReq : orderRequest.getItems()) {
+                if (itemReq.getQuantity() == null || itemReq.getQuantity() <= 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Số lượng sản phẩm phải lớn hơn 0!");
+                }
+
                 ProductDTO product = fetchProductFromService(itemReq.getProductId(), authHeader);
 
                 if (product.getQuantity() == null || product.getQuantity() < itemReq.getQuantity()) {
@@ -109,23 +121,50 @@ public class OrderService {
 
     @Transactional
     public Order updateOrderStatus(Integer id, String newStatus, String authHeader) {
+        if (newStatus == null || !VALID_STATUSES.contains(newStatus.toLowerCase())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Trạng thái không hợp lệ. Chỉ chấp nhận: pending, completed, cancelled");
+        }
+
         Order order = getOrderById(id);
         String oldStatus = order.getStatus();
+        String normalizedNewStatus = newStatus.toLowerCase();
 
-        // Nếu hủy đơn (chuyển sang cancelled từ trạng thái khác) -> hoàn lại tồn kho
-        if ("cancelled".equalsIgnoreCase(newStatus) && !"cancelled".equalsIgnoreCase(oldStatus)) {
+        // 1. Nếu hủy đơn (chuyển sang cancelled từ trạng thái khác) -> hoàn lại tồn kho
+        if ("cancelled".equals(normalizedNewStatus) && !"cancelled".equalsIgnoreCase(oldStatus)) {
+            for (OrderItem item : order.getItems()) {
+                ProductDTO product = fetchProductFromService(item.getProductId(), authHeader);
+                updateProductStock(product, item.getQuantity(), authHeader);
+            }
+        }
+        // 2. Nếu khôi phục đơn từ cancelled sang pending/completed -> kiểm tra và trừ lại tồn kho
+        else if (!"cancelled".equals(normalizedNewStatus) && "cancelled".equalsIgnoreCase(oldStatus)) {
+            for (OrderItem item : order.getItems()) {
+                ProductDTO product = fetchProductFromService(item.getProductId(), authHeader);
+                if (product.getQuantity() == null || product.getQuantity() < item.getQuantity()) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Sản phẩm '" + product.getName() + "' không đủ tồn kho để khôi phục đơn!");
+                }
+                updateProductStock(product, -item.getQuantity(), authHeader);
+            }
+        }
+
+        order.setStatus(normalizedNewStatus);
+        return orderRepository.save(order);
+    }
+
+    @Transactional
+    public void deleteOrder(Integer id, String authHeader) {
+        Order order = getOrderById(id);
+
+        // Chỉ hoàn kho nếu đơn hàng chưa bị hủy trước đó
+        if (!"cancelled".equalsIgnoreCase(order.getStatus())) {
             for (OrderItem item : order.getItems()) {
                 ProductDTO product = fetchProductFromService(item.getProductId(), authHeader);
                 updateProductStock(product, item.getQuantity(), authHeader);
             }
         }
 
-        order.setStatus(newStatus);
-        return orderRepository.save(order);
-    }
-
-    public void deleteOrder(Integer id) {
-        Order order = getOrderById(id);
         orderRepository.delete(order);
     }
 
