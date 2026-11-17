@@ -116,19 +116,64 @@
 
 * **`DELETE /order_items/{id}`** — Xóa mặt hàng khỏi đơn hàng
 
-# ảnh chụp màn hình 
-- bài thực hành số 2:
-![Demo Result](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth2/register.png)
-![Demo Result](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth2/login.png)
-![Demo Result](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth2/auth.png)
 
 
-- bài thực hành số 3:
-![Demo Result](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth3/add-new-product.png)
-![Demo Result](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth3/get-a-product.png)
-![Demo Result](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth3/get-all-products.png)
-![Demo Result](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth3/update-product.png)
+# Ảnh chụp màn hình
 
+## Bài thực hành số 2 (Auth Service)
 
-- bài thực hành số 4:
-*(Cập nhật ảnh demo BTH4 tại đây sau khi test)*
+* **Đăng ký tài khoản (`POST /register`):**
+  ![Register](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth2/register.png)
+
+* **Đăng nhập lấy JWT Token (`POST /login`):**
+  ![Login](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth2/login.png)
+
+* **Kiểm tra xác thực Token (`GET /auth`):**
+  ![Auth](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth2/auth.png)
+
+---
+
+## Bài thực hành số 3 (Product Service)
+
+* **Thêm sản phẩm mới (`POST /products`):**
+  ![Add New Product](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth3/add-new-product.png)
+
+* **Lấy danh sách tất cả sản phẩm (`GET /products`):**
+  ![Get All Products](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth3/get-all-products.png)
+
+* **Lấy chi tiết một sản phẩm (`GET /products/{id}`):**
+  ![Get A Product](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth3/get-a-product.png)
+
+* **Cập nhật thông tin sản phẩm (`PUT /products/{id}`):**
+  ![Update Product](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth3/update-product.png)
+
+---
+
+## Bài thực hành số 4 (Order Service)
+
+* **Lấy danh sách tất cả đơn hàng (`GET /orders`):**
+  ![Get All Orders](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth4/getds-tatca-donhang.png)
+
+* **Lấy chi tiết một đơn hàng (`GET /orders/{id}`):**
+  ![Get Order By ID](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth4/get-1-donhang.png)
+
+* **Cập nhật trạng thái đơn hàng (`PUT /orders/{id}`):**
+  ![Update Order Status](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth4/update-status-donhang.png)
+
+* **Xóa đơn hàng (`DELETE /orders/{id}`):**
+  ![Delete Order](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth4/xoa-donhang.png)
+
+* **Lấy danh sách tất cả mặt hàng trong đơn (`GET /order_items`):**
+  ![Get All Order Items](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth4/layds-tatca-mathang.png)
+
+* **Lấy chi tiết một mặt hàng (`GET /order_items/{id}`):**
+  ![Get Order Item By ID](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth4/lay-chitiet-1-mathang.png)
+
+* **Thêm mặt hàng mới vào đơn hàng (`POST /order_items`):**
+  ![Add Order Item](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth4/them-mat-hang-moi-vao-donhang.png)
+
+* **Cập nhật mặt hàng trong đơn hàng (`PUT /order_items/{id}`):**
+  ![Update Order Item](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth4/update-thongtin-1-mathang.png)
+
+* **Xóa mặt hàng khỏi đơn hàng (`DELETE /order_items/{id}`):**
+  ![Delete Order Item](https://github.com/cuongpipe/SOA-BTH/blob/main/sreenshoot/bth4/xoa-1-mathang-khoi-donhang.png)
